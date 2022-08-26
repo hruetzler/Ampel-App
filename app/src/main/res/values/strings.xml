@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Ampel</string>
+    <string name="refresh">Refresh :)</string>
+    <string name="red">Rot</string>
+    <string name="green">Grün</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="connect">Connect</string>
+    <string name="ampelAddress">34:94:54:F6:F9:9E</string>
+    <string name="bluetoothErlaubnis">Ich brauche die Bluetootherlaubnis, um auf die Ampel zuzugreifen, aktiviere das bitte in den Einstellungen deines Handys und starte die App neu.</string>
+    <string name="bluetoothOff">Bitte aktiviere Bluetooth :)</string>
+    <string name="schalter">Ampel Schalten</string>
+    <string name="greenTime">Grüne Zeit:</string>
+    <string name="redTime">Rote Zeit:</string>
+    <string name="greenTimeDelay">Green Delay:</string>
+    <string name="explainSettings">Alle angaben in cm \n Hier sind die Einstellungen zur Ampel: \n  - Grüne Zeit: gibt den Wert an, wie lange es dauert bis es Grün wird. \n - Rote Zeit: gibt den Wert an, wie lange es dauert bis es wieder Grün wird \n - Bis zur Grünen Zeit: gibt den Wert an, wie lange es dauert, beim klicken auf den Tasta, bis es Grün wird.</string>
+</resources>
