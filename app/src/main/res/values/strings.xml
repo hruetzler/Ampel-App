@@ -12,5 +12,10 @@
     <string name="greenTime">Grüne Zeit:</string>
     <string name="redTime">Rote Zeit:</string>
     <string name="greenTimeDelay">Green Delay:</string>
-    <string name="explainSettings">Alle angaben in cm \n Hier sind die Einstellungen zur Ampel: \n  - Grüne Zeit: gibt den Wert an, wie lange es dauert bis es Grün wird. \n - Rote Zeit: gibt den Wert an, wie lange es dauert bis es wieder Grün wird \n - Bis zur Grünen Zeit: gibt den Wert an, wie lange es dauert, beim klicken auf den Tasta, bis es Grün wird.</string>
+    <string name="enableAutomatic">Automatisch Steuern:</string>
+    <string name="enableToggle">Sofort umschalten:</string>
+    <string name="enableRequestGreen">Grünanzufordern:</string>
+    <string name="enableSwitch">Taster deaktivieren:</string>
+
+
 </resources>

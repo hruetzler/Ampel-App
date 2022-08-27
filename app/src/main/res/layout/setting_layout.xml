@@ -25,10 +25,11 @@
 
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/cost_of_service_edit_text"
+            android:id="@+id/greenTimeEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="number" />
+            android:inputType="number"
+            style="@style/Widget.Ampel.TextView"/>
 
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -50,10 +51,11 @@
 
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/cost_of_service_edit_text2"
+            android:id="@+id/redTimeEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="number" />
+            android:inputType="number"
+            style="@style/Widget.Ampel.TextView"/>
 
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -77,10 +79,11 @@
 
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/cost_of_service_edit_text3"
+            android:id="@+id/greenTimeDelayEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="number" />
+            android:inputType="number"
+            style="@style/Widget.Ampel.TextView"/>
 
 
     </com.google.android.material.textfield.TextInputLayout>
