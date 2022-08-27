@@ -15,13 +15,21 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.ampel.ControlActivity.Companion.m_address
+import com.example.ampel.ControlActivity.Companion.m_bluetoothAdapter
+import com.example.ampel.ControlActivity.Companion.m_bluetoothSocket
+import com.example.ampel.ControlActivity.Companion.m_isConnected
+import com.example.ampel.ControlActivity.Companion.m_myUUID
+import com.example.ampel.ControlActivity.Companion.m_progress
 import java.io.IOException
+import java.io.InputStream
 import java.util.*
-
-
+import kotlin.collections.ArrayList
+import kotlin.concurrent.thread
 
 
 class ControlActivity: AppCompatActivity(){
+
 
     companion object {
         var m_myUUID: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
@@ -52,7 +60,6 @@ class ControlActivity: AppCompatActivity(){
         val ampelPicture = findViewById<ImageView>(R.id.ampelPicture)
         val ampelSchalter = findViewById<Button>(R.id.schalter)
         val control_led_disconnect = findViewById<Button>(R.id.control_led_disconnect)
-
         settingButton.setOnClickListener { setting() }
         ampelPicture.setOnClickListener { sendComand("toggle") }
         ampelSchalter.setOnClickListener { sendComand("toggle") }
@@ -73,6 +80,7 @@ class ControlActivity: AppCompatActivity(){
                 /*if (m_bluetoothSocket!!.inputStream.available()){
                     m_bluetoothSocket!!.inputStream.readBytes();
                 }*/
+
             } catch (e: IOException){
                 Log.i("wichtig", "catch")
                 Toast.makeText(this, "Ein Satz mit X das war wohl nix.", Toast.LENGTH_LONG).show()
@@ -101,6 +109,36 @@ class ControlActivity: AppCompatActivity(){
         finish()
     }
 
+    public fun receive() {
+        val mmBuffer: ByteArray = ByteArray(1024) // mmBuffer store for the stream
+        val mmInStream: InputStream = m_bluetoothSocket!!.inputStream
+        var numBytes: Int // bytes returned from read()
+        var message: String
+        var value : Int
+        var bufferIndex : Int = 0
+        while (true){
+            value = try {
+                mmInStream.read()
+            } catch (e: IOException) {
+                Log.d("wichtig", "Input stream was disconnected", e)
+                break
+            }
+
+            if ( value != 0x0a){
+                mmBuffer[bufferIndex++] = value.toByte()
+            }else{
+                message = String(mmBuffer)
+                message = message.substring(0,bufferIndex)
+                bufferIndex = 0
+                Log.i("wichtig", message)
+                val arr = message.split("|").toTypedArray()
+                Log.i("wichtig", "test")
+                Log.i("wichtig", arr[2])
+            }
+            if (bufferIndex > 1024) bufferIndex = 0
+
+        }
+    }
 
     private class ConnectToDevice(c: Context): AsyncTask<Void, Void, String>() {
         private var connectSuccess: Boolean = true
@@ -128,6 +166,9 @@ class ControlActivity: AppCompatActivity(){
                     m_bluetoothSocket = device.createInsecureRfcommSocketToServiceRecord(m_myUUID)
                     BluetoothAdapter.getDefaultAdapter().cancelDiscovery()
                     m_bluetoothSocket!!.connect()
+                    thread {
+                       (context as ControlActivity).receive()
+                    }
 
 
                 }
