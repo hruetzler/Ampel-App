@@ -11,6 +11,7 @@ import android.widget.Button
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
+import com.example.ampel.ControlActivity.Companion.messageID
 import com.google.android.material.textfield.TextInputEditText
 
 class SettingActivity: AppCompatActivity() {
@@ -20,7 +21,9 @@ class SettingActivity: AppCompatActivity() {
         setContentView(R.layout.setting_layout)
         Log.i("wichtig", "jetzt wurde die ansicht geändert.")
 
-        ControlActivity.Companion.g_controlActivity.sendComand("test")
+
+
+
 
 
         val settingButton = findViewById<ImageButton>(R.id.floating_setting_button)
@@ -28,16 +31,34 @@ class SettingActivity: AppCompatActivity() {
         val redTimeInputEditText = findViewById<TextInputEditText>(R.id.redTimeEditText)
         val greenTimeDelayEditText = findViewById<TextInputEditText>(R.id.greenTimeDelayEditText)
 
+        abfrage()
 
 
         settingButton.setOnClickListener { setting() }
-        greenTimeInputEditText.addTextChangedListener { ControlActivity.Companion.g_controlActivity.sendComand(greenTimeInputEditText.text.toString()) }
-        redTimeInputEditText.addTextChangedListener { ControlActivity.Companion.g_controlActivity.sendComand(greenTimeInputEditText.text.toString()) }
-        greenTimeDelayEditText.addTextChangedListener { ControlActivity.Companion.g_controlActivity.sendComand(greenTimeInputEditText.text.toString()) }
+        greenTimeInputEditText.addTextChangedListener { greenTime() }
+        redTimeInputEditText.addTextChangedListener { redTime() }
+        greenTimeDelayEditText.addTextChangedListener { greenTimeDelay() }
 
 
 
+    }
 
+    fun abfrage(){
+
+    }
+
+
+    fun greenTime(){
+        val greenTimeInputEditText = findViewById<TextInputEditText>(R.id.greenTimeEditText)
+        ControlActivity.Companion.g_controlActivity.sendComand("setGreenTime", greenTimeInputEditText.text.toString())
+    }
+    fun redTime(){
+        val redTimeInputEditText = findViewById<TextInputEditText>(R.id.redTimeEditText)
+        ControlActivity.Companion.g_controlActivity.sendComand("setRedTime", redTimeInputEditText.text.toString())
+    }
+    fun greenTimeDelay(){
+        val greenTimeDelayEditText = findViewById<TextInputEditText>(R.id.greenTimeDelayEditText)
+        ControlActivity.Companion.g_controlActivity.sendComand("setGreenDelayTime", greenTimeDelayEditText.text.toString())
     }
 
     private fun setting(){

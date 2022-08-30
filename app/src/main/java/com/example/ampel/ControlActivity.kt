@@ -10,21 +10,15 @@ import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import com.example.ampel.ControlActivity.Companion.m_address
-import com.example.ampel.ControlActivity.Companion.m_bluetoothAdapter
 import com.example.ampel.ControlActivity.Companion.m_bluetoothSocket
 import com.example.ampel.ControlActivity.Companion.m_isConnected
-import com.example.ampel.ControlActivity.Companion.m_myUUID
 import com.example.ampel.ControlActivity.Companion.m_progress
+import com.google.android.material.switchmaterial.SwitchMaterial
 import java.io.IOException
 import java.io.InputStream
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.concurrent.thread
 
 
@@ -38,9 +32,11 @@ class ControlActivity: AppCompatActivity(){
         lateinit var m_bluetoothAdapter: BluetoothAdapter
         var m_isConnected: Boolean = false
         lateinit var m_address: String
+        var messageID = 0
+
 
         lateinit var g_controlActivity: ControlActivity
-
+        val msgIdMap: MutableMap<String, String> = mutableMapOf()
     }
 
 
@@ -55,34 +51,91 @@ class ControlActivity: AppCompatActivity(){
 
         bluetooth.connectBluetooth()
 
+
         ConnectToDevice(this).execute()
         val settingButton = findViewById<ImageButton>(R.id.floating_setting_button)
-        val ampelPicture = findViewById<ImageView>(R.id.ampelPicture)
+
         val ampelSchalter = findViewById<Button>(R.id.schalter)
         val control_led_disconnect = findViewById<Button>(R.id.control_led_disconnect)
+        val ampelPicture = findViewById<ImageView>(R.id.ampelPicture)
+        val automaticMode = findViewById<SwitchMaterial>(R.id.automaticModeSwitch)
+        val radioButton = findViewById<RadioGroup>(R.id.radioGroup)
+
+        automaticMode.setOnClickListener{automatic()}
         settingButton.setOnClickListener { setting() }
-        ampelPicture.setOnClickListener { sendComand("toggle") }
-        ampelSchalter.setOnClickListener { sendComand("toggle") }
+        ampelPicture.setOnClickListener { toggle() }
+        ampelSchalter.setOnClickListener { toggle() }
         control_led_disconnect.setOnClickListener { disconnect() }
+        ampelPicture.setImageResource(R.drawable.ampelred)
+
+        radioButton.setOnCheckedChangeListener { group, checkedID ->
+            Log.i("wichtig", group.toString() + checkedID.toString())
+            tasterEinstellung()
+
+        }
 
 
 
     }
 
-    public fun sendComand(input: String){
-        Log.i("wichtig", "versuche jetzt ein Comand zu senden")
+    fun startAbfrage(){
+        sendComand("getAutomaticMode", null)
+
+
+        sendComand("getButtonMode", null)
+
+
+    }
+
+    fun automatic(){
+        val automaticMode = findViewById<SwitchMaterial>(R.id.automaticModeSwitch)
+        if (automaticMode.isChecked){
+            sendComand("setAutomaticMode", "true")
+        }else{
+            sendComand("setAutomaticMode", "false")
+        }
+    }
+
+    private fun toggle(){
+        sendComand("toggle", null)
+
+    }
+
+    private fun tasterEinstellung(){
+        val radioButtonGreen = findViewById<RadioButton>(R.id.radio_button_requestGreen)
+        val radioButtonToggle = findViewById<RadioButton>(R.id.radio_button_toggle)
+        val radioButtonOff = findViewById<RadioButton>(R.id.radio_button_off)
+
+        if (radioButtonGreen.isChecked){
+            sendComand("setButtonMode", "requestGreen")
+
+        } else{
+            if (radioButtonToggle.isChecked){
+                sendComand("setButtonMode", "toggle")
+
+            } else {
+                if (radioButtonOff.isChecked){
+                    sendComand("setButtonMode", "off")
+
+                }
+            }
+        }
+    }
+
+    fun sendComand(command: String, wert: String?){
         if (m_bluetoothSocket != null){
-            Log.i("wichtig", "if abfrage")
             try {
-                Log.i("wichtig", "try")
-                m_bluetoothSocket!!.outputStream.write(input.plus("\r\n").toByteArray())
-                Log.i("wichtig", "hat geklapt")
-                /*if (m_bluetoothSocket!!.inputStream.available()){
-                    m_bluetoothSocket!!.inputStream.readBytes();
-                }*/
+//                msgIdMap[messageID.toString()] = command
+                if (wert == null){
+                    m_bluetoothSocket!!.outputStream.write((command + "|" + messageID + "\n").toByteArray())
+                    messageID++
+                } else {
+                    m_bluetoothSocket!!.outputStream.write((command + "|" + messageID + "|" + wert + "\n").toByteArray())
+                    messageID++
+                }
 
             } catch (e: IOException){
-                Log.i("wichtig", "catch")
+                Log.i("wichtig", "Das senden hat eines Comand hat nicht geklapt.")
                 Toast.makeText(this, "Ein Satz mit X das war wohl nix.", Toast.LENGTH_LONG).show()
                 e.printStackTrace()
             }
@@ -91,7 +144,6 @@ class ControlActivity: AppCompatActivity(){
 
     private fun setting(){
         val settings = Intent(this, SettingActivity::class.java)
-        Log.i("wichtig", "jetzt wird die Activity gestartet")
         startActivity(settings)
 
     }
@@ -109,10 +161,10 @@ class ControlActivity: AppCompatActivity(){
         finish()
     }
 
-    public fun receive() {
+    private fun receive(){
+        startAbfrage()
         val mmBuffer: ByteArray = ByteArray(1024) // mmBuffer store for the stream
         val mmInStream: InputStream = m_bluetoothSocket!!.inputStream
-        var numBytes: Int // bytes returned from read()
         var message: String
         var value : Int
         var bufferIndex : Int = 0
@@ -123,7 +175,6 @@ class ControlActivity: AppCompatActivity(){
                 Log.d("wichtig", "Input stream was disconnected", e)
                 break
             }
-
             if ( value != 0x0a){
                 mmBuffer[bufferIndex++] = value.toByte()
             }else{
@@ -131,14 +182,80 @@ class ControlActivity: AppCompatActivity(){
                 message = message.substring(0,bufferIndex)
                 bufferIndex = 0
                 Log.i("wichtig", message)
-                val arr = message.split("|").toTypedArray()
-                Log.i("wichtig", "test")
-                Log.i("wichtig", arr[2])
+                val messageArry = message.split("|").toTypedArray()
+                val command = messageArry[0];
+                val msgId = messageArry[1];
+
+                if (command == "ACK"){
+                    Log.i("wichtig", msgIdMap.toString() + " " + msgId)
+                    var sendCommand = msgIdMap.remove(msgId);
+                    if (sendCommand != null){
+                        Log.i("wichtig", "received ack from " + sendCommand)
+                        answerMessage(sendCommand, messageArry)
+
+                    }
+
+                }else{
+                    Log.i("wichtig", message)
+                    messageEdit(messageArry)
+                }
+
+
             }
             if (bufferIndex > 1024) bufferIndex = 0
+        }
+    }
+
+    fun answerMessage(sendCommand: String, messageArray: Array<String>){
+        runOnUiThread {
+            if (sendCommand == "getAutomaticMode") {
+                val automaticMode = findViewById<SwitchMaterial>(R.id.automaticModeSwitch)
+                automaticMode.isChecked = messageArray[2] == "true"
+            }
+            if (sendCommand == "getButtonMode"){
+                val radioButtonGreen = findViewById<RadioButton>(R.id.radio_button_requestGreen)
+                val radioButtonToggle = findViewById<RadioButton>(R.id.radio_button_toggle)
+                val radioButtonOff = findViewById<RadioButton>(R.id.radio_button_off)
+                if (messageArray[2] == "requestGreen"){
+                    Log.i("wichtig", "Auswahl: Request Green")
+                    radioButtonGreen.isChecked = true
+
+                } else {
+                    if (messageArray[2] == "toggle"){
+                        Log.i("wichtig", "Auswahl: Request Toggle")
+                        radioButtonToggle.isChecked = true
+
+                    } else {
+                        Log.i("wichtig", "Auswahl: Request Off")
+                        radioButtonOff.isChecked = true
+                    }
+                }
+            }
 
         }
     }
+
+
+
+    fun messageEdit(input: Array<String>) {
+
+        runOnUiThread {
+            val ampelPicture = findViewById<ImageView>(R.id.ampelPicture)
+            if (input[0] == "actState"){
+                if (input[2] == "green"){
+                    ampelPicture.setImageResource(R.drawable.ampelgreen)
+                    Log.i("wichtig", "Ampel farbe Grün")
+
+                } else{
+                    ampelPicture.setImageResource(R.drawable.ampelred)
+                    Log.i("wichtig", "Ampel farbe Rot")
+
+                }
+            }
+
+        }
+    }
+
 
     private class ConnectToDevice(c: Context): AsyncTask<Void, Void, String>() {
         private var connectSuccess: Boolean = true
@@ -166,8 +283,10 @@ class ControlActivity: AppCompatActivity(){
                     m_bluetoothSocket = device.createInsecureRfcommSocketToServiceRecord(m_myUUID)
                     BluetoothAdapter.getDefaultAdapter().cancelDiscovery()
                     m_bluetoothSocket!!.connect()
+
                     thread {
                        (context as ControlActivity).receive()
+
                     }
 
 
@@ -181,13 +300,13 @@ class ControlActivity: AppCompatActivity(){
             return null
         }
 
+
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
             if (!connectSuccess){
                 Log.i("data", "couldn't connect")
             } else {
                 connectSuccess = true
-                Log.i("data", "connect2")
             }
             m_progress.dismiss()
         }

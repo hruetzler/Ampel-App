@@ -56,8 +56,10 @@ class MainActivity : AppCompatActivity() {
     private fun refresh(){
         val connect = findViewById<Button>(R.id.connect)
         val ampelStart = findViewById<ImageView>(R.id.ampelStart)
+        val bluetoothOFF = findViewById<TextView>(R.id.bluetoothOFF)
         if (m_bluetoothAdapter!!.isEnabled){
             connect.visibility = View.VISIBLE
+            bluetoothOFF.visibility = View.INVISIBLE
             ampelStart.setImageResource(R.drawable.ampelgreen)
         }
     }
