@@ -33,9 +33,9 @@ class ControlActivity: AppCompatActivity(){
         var m_isConnected: Boolean = false
         lateinit var m_address: String
         var messageID = 0
-        var greenTimeDelay: Int = 50
-        var greenTime : Int = 5
-        var redTime: Int = 60
+        var greenTimeDelay: String = "50"
+        var greenTime : String = ""
+        var redTime: String = "60"
 
 
         lateinit var g_controlActivity: ControlActivity
@@ -149,6 +149,9 @@ class ControlActivity: AppCompatActivity(){
     }
 
     private fun setting(){
+        sendComand("getGreenTime", null)
+        sendComand("getRedTime", null)
+        sendComand("getGreenDelayTime", null)
         val settings = Intent(this, SettingActivity::class.java)
         startActivity(settings)
 
@@ -248,13 +251,14 @@ class ControlActivity: AppCompatActivity(){
             }
 
             if (sendCommand == "getGreenTime"){
-                greenTime = messageArray[2].toInt()
+                greenTime = messageArray[2]
+
             }
             if (sendCommand == "getRedTime"){
-                redTime = messageArray[2].toInt()
+                redTime = messageArray[2]
             }
             if (sendCommand == "getGreenDelayTime"){
-                greenTimeDelay = messageArray[2].toInt()
+                greenTimeDelay = messageArray[2]
             }
 
         }

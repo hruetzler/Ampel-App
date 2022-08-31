@@ -9,13 +9,14 @@
     <string name="bluetoothErlaubnis">Ich brauche die Bluetootherlaubnis, um auf die Ampel zuzugreifen, aktiviere das bitte in den Einstellungen deines Handys und starte die App neu.</string>
     <string name="bluetoothOff">Bitte aktiviere Bluetooth :)</string>
     <string name="schalter">Ampel Schalten</string>
-    <string name="greenTime">Grüne Zeit:</string>
+    <string name="greenTimeText">Grüne Zeit:</string>
     <string name="redTime">Rote Zeit:</string>
     <string name="greenTimeDelay">Green Delay:</string>
     <string name="enableAutomatic">Automatisch Steuern:</string>
     <string name="enableToggle">Sofort umschalten:</string>
     <string name="enableRequestGreen">Grün anfordern:</string>
     <string name="enableSwitch">Taster deaktivieren:</string>
+    <string name="greenTime">adasdfl?</string>
 
 
 </resources>

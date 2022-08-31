@@ -11,8 +11,11 @@ import android.widget.Button
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
+import androidx.core.widget.doAfterTextChanged
+import com.example.ampel.ControlActivity.Companion.greenTime
 import com.example.ampel.ControlActivity.Companion.greenTimeDelay
 import com.example.ampel.ControlActivity.Companion.messageID
+import com.example.ampel.ControlActivity.Companion.redTime
 import com.google.android.material.textfield.TextInputEditText
 
 class SettingActivity: AppCompatActivity() {
@@ -23,21 +26,21 @@ class SettingActivity: AppCompatActivity() {
         Log.i("wichtig", "jetzt wurde die ansicht geändert.")
 
 
-        val settingButton = findViewById<ImageButton>(R.id.floating_setting_button)
+
         val greenTimeInputEditText = findViewById<TextInputEditText>(R.id.greenTimeEditText)
         val redTimeInputEditText = findViewById<TextInputEditText>(R.id.redTimeEditText)
         val greenTimeDelayEditText = findViewById<TextInputEditText>(R.id.greenTimeDelayEditText)
 
+        greenTimeInputEditText.setText(greenTime)
+        redTimeInputEditText.setText(redTime)
+        greenTimeDelayEditText.setText(greenTimeDelay)
 
-
-
-
-
-
-        settingButton.setOnClickListener { setting() }
-        greenTimeInputEditText.addTextChangedListener { greenTime() }
+        /*greenTimeInputEditText.addTextChangedListener { greenTime() }
         redTimeInputEditText.addTextChangedListener { redTime() }
-        greenTimeDelayEditText.addTextChangedListener { greenTimeDelay() }
+        greenTimeDelayEditText.addTextChangedListener { greenTimeDelay() }*/
+        greenTimeInputEditText.doAfterTextChanged { greenTime() }
+        redTimeInputEditText.doAfterTextChanged { redTime() }
+        greenTimeDelayEditText.doAfterTextChanged { greenTimeDelay() }
 
 
 
@@ -49,21 +52,20 @@ class SettingActivity: AppCompatActivity() {
     fun greenTime(){
         val greenTimeInputEditText = findViewById<TextInputEditText>(R.id.greenTimeEditText)
         ControlActivity.Companion.g_controlActivity.sendComand("setGreenTime", greenTimeInputEditText.text.toString())
+        greenTime = greenTimeInputEditText.text.toString()
     }
     fun redTime(){
         val redTimeInputEditText = findViewById<TextInputEditText>(R.id.redTimeEditText)
         ControlActivity.Companion.g_controlActivity.sendComand("setRedTime", redTimeInputEditText.text.toString())
+        redTime = redTimeInputEditText.text.toString()
     }
     fun greenTimeDelay(){
         val greenTimeDelayEditText = findViewById<TextInputEditText>(R.id.greenTimeDelayEditText)
         ControlActivity.Companion.g_controlActivity.sendComand("setGreenDelayTime", greenTimeDelayEditText.text.toString())
+        greenTimeDelay = greenTimeDelayEditText.text.toString()
     }
 
-    private fun setting(){
-        val intent = Intent(this, ControlActivity::class.java)
-        startActivity(intent)
 
-    }
 
     private fun handleKeyEvent(view: View, keyCode: Int): Boolean {
         if (keyCode == KeyEvent.KEYCODE_ENTER) {
