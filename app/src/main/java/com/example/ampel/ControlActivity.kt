@@ -33,6 +33,9 @@ class ControlActivity: AppCompatActivity(){
         var m_isConnected: Boolean = false
         lateinit var m_address: String
         var messageID = 0
+        var greenTimeDelay: Int = 50
+        var greenTime : Int = 5
+        var redTime: Int = 60
 
 
         lateinit var g_controlActivity: ControlActivity
@@ -66,7 +69,7 @@ class ControlActivity: AppCompatActivity(){
         ampelPicture.setOnClickListener { toggle() }
         ampelSchalter.setOnClickListener { toggle() }
         control_led_disconnect.setOnClickListener { disconnect() }
-        ampelPicture.setImageResource(R.drawable.ampelred)
+
 
         radioButton.setOnCheckedChangeListener { group, checkedID ->
             Log.i("wichtig", group.toString() + checkedID.toString())
@@ -80,9 +83,12 @@ class ControlActivity: AppCompatActivity(){
 
     fun startAbfrage(){
         sendComand("getAutomaticMode", null)
-
-
         sendComand("getButtonMode", null)
+        sendComand("getState", null)
+
+        sendComand("getGreenTime", null)
+        sendComand("getRedTime", null)
+        sendComand("getGreenDelayTime", null)
 
 
     }
@@ -125,7 +131,7 @@ class ControlActivity: AppCompatActivity(){
     fun sendComand(command: String, wert: String?){
         if (m_bluetoothSocket != null){
             try {
-//                msgIdMap[messageID.toString()] = command
+                msgIdMap[messageID.toString()] = command
                 if (wert == null){
                     m_bluetoothSocket!!.outputStream.write((command + "|" + messageID + "\n").toByteArray())
                     messageID++
@@ -230,6 +236,25 @@ class ControlActivity: AppCompatActivity(){
                         radioButtonOff.isChecked = true
                     }
                 }
+            }
+            if (sendCommand == "getState"){
+                val ampelPicture = findViewById<ImageView>(R.id.ampelPicture)
+                if (messageArray[2] == "green"){
+                    ampelPicture.setImageResource(R.drawable.ampelgreen)
+                } else{
+                    ampelPicture.setImageResource(R.drawable.ampelred)
+                }
+
+            }
+
+            if (sendCommand == "getGreenTime"){
+                greenTime = messageArray[2].toInt()
+            }
+            if (sendCommand == "getRedTime"){
+                redTime = messageArray[2].toInt()
+            }
+            if (sendCommand == "getGreenDelayTime"){
+                greenTimeDelay = messageArray[2].toInt()
             }
 
         }

@@ -11,6 +11,7 @@ import android.widget.Button
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
+import com.example.ampel.ControlActivity.Companion.greenTimeDelay
 import com.example.ampel.ControlActivity.Companion.messageID
 import com.google.android.material.textfield.TextInputEditText
 
@@ -22,16 +23,15 @@ class SettingActivity: AppCompatActivity() {
         Log.i("wichtig", "jetzt wurde die ansicht geändert.")
 
 
-
-
-
-
         val settingButton = findViewById<ImageButton>(R.id.floating_setting_button)
         val greenTimeInputEditText = findViewById<TextInputEditText>(R.id.greenTimeEditText)
         val redTimeInputEditText = findViewById<TextInputEditText>(R.id.redTimeEditText)
         val greenTimeDelayEditText = findViewById<TextInputEditText>(R.id.greenTimeDelayEditText)
 
-        abfrage()
+
+
+
+
 
 
         settingButton.setOnClickListener { setting() }
@@ -43,9 +43,7 @@ class SettingActivity: AppCompatActivity() {
 
     }
 
-    fun abfrage(){
 
-    }
 
 
     fun greenTime(){
