@@ -70,7 +70,8 @@
         android:text="@string/refresh"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginBottom="20dp"
-        android:layout_marginEnd="20sp" />
+        android:layout_marginEnd="20sp"
+        android:visibility="invisible"/>
 
 
 

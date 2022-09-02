@@ -16,7 +16,7 @@
     <string name="enableToggle">Sofort umschalten:</string>
     <string name="enableRequestGreen">Grün anfordern:</string>
     <string name="enableSwitch">Taster deaktivieren:</string>
-    <string name="greenTime">adasdfl?</string>
+    <string name="settingText">Settings</string>
 
 
 </resources>

@@ -24,13 +24,14 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
 
-
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/greenTimeEditText"
+            style="@style/Widget.Ampel.TextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="number"
-            style="@style/Widget.Ampel.TextView"/>
+            android:textColorHint="#757575"
+            tools:ignore="TextContrastCheck" />
 
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -50,13 +51,14 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
 
-
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/redTimeEditText"
+            style="@style/Widget.Ampel.TextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="number"
-            style="@style/Widget.Ampel.TextView"/>
+            android:textColorHint="#757575"
+            tools:ignore="TextContrastCheck" />
 
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -78,16 +80,27 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
 
-
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/greenTimeDelayEditText"
+            style="@style/Widget.Ampel.TextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="number"
-            style="@style/Widget.Ampel.TextView"/>
+            android:textColorHint="#757575"
+            tools:ignore="TextContrastCheck" />
 
 
     </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:id="@+id/version"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_margin="20dp"
+        android:textSize="9sp"
+        tools:ignore="SmallSp" />
 
 
 

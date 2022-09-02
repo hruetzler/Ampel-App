@@ -12,9 +12,6 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import com.example.ampel.ControlActivity.Companion.m_bluetoothSocket
-import com.example.ampel.ControlActivity.Companion.m_isConnected
-import com.example.ampel.ControlActivity.Companion.m_progress
 import com.google.android.material.switchmaterial.SwitchMaterial
 import java.io.IOException
 import java.io.InputStream
@@ -36,6 +33,8 @@ class ControlActivity: AppCompatActivity(){
         var greenTimeDelay: String = "50"
         var greenTime : String = ""
         var redTime: String = "60"
+        lateinit var versionControler: String
+        lateinit var versionProtocol: String
 
 
         lateinit var g_controlActivity: ControlActivity
@@ -50,9 +49,7 @@ class ControlActivity: AppCompatActivity(){
         setContentView(R.layout.control_layout)
         m_address = intent.getStringExtra(MainActivity.EXTRA_ADDRESS).toString()
 
-        val bluetooth = Bluetooth()
 
-        bluetooth.connectBluetooth()
 
 
         ConnectToDevice(this).execute()
@@ -81,10 +78,12 @@ class ControlActivity: AppCompatActivity(){
 
     }
 
-    fun startAbfrage(){
+    private fun startAbfrage(){
         sendComand("getAutomaticMode", null)
         sendComand("getButtonMode", null)
         sendComand("getState", null)
+        sendComand("version", null)
+        sendComand("protocolVersion", null)
 
         sendComand("getGreenTime", null)
         sendComand("getRedTime", null)
@@ -93,7 +92,7 @@ class ControlActivity: AppCompatActivity(){
 
     }
 
-    fun automatic(){
+    private fun automatic(){
         val automaticMode = findViewById<SwitchMaterial>(R.id.automaticModeSwitch)
         if (automaticMode.isChecked){
             sendComand("setAutomaticMode", "true")
@@ -133,10 +132,10 @@ class ControlActivity: AppCompatActivity(){
             try {
                 msgIdMap[messageID.toString()] = command
                 if (wert == null){
-                    m_bluetoothSocket!!.outputStream.write((command + "|" + messageID + "\n").toByteArray())
+                    m_bluetoothSocket!!.outputStream.write(("$command|$messageID\n").toByteArray())
                     messageID++
                 } else {
-                    m_bluetoothSocket!!.outputStream.write((command + "|" + messageID + "|" + wert + "\n").toByteArray())
+                    m_bluetoothSocket!!.outputStream.write(("$command|$messageID|$wert\n").toByteArray())
                     messageID++
                 }
 
@@ -172,11 +171,11 @@ class ControlActivity: AppCompatActivity(){
 
     private fun receive(){
         startAbfrage()
-        val mmBuffer: ByteArray = ByteArray(1024) // mmBuffer store for the stream
+        val mmBuffer = ByteArray(1024) // mmBuffer store for the stream
         val mmInStream: InputStream = m_bluetoothSocket!!.inputStream
         var message: String
         var value : Int
-        var bufferIndex : Int = 0
+        var bufferIndex  = 0
         while (true){
             value = try {
                 mmInStream.read()
@@ -192,14 +191,14 @@ class ControlActivity: AppCompatActivity(){
                 bufferIndex = 0
                 Log.i("wichtig", message)
                 val messageArry = message.split("|").toTypedArray()
-                val command = messageArry[0];
-                val msgId = messageArry[1];
+                val command = messageArry[0]
+                val msgId = messageArry[1]
 
                 if (command == "ACK"){
-                    Log.i("wichtig", msgIdMap.toString() + " " + msgId)
+                    Log.i("wichtig", "$msgIdMap $msgId")
                     var sendCommand = msgIdMap.remove(msgId);
                     if (sendCommand != null){
-                        Log.i("wichtig", "received ack from " + sendCommand)
+                        Log.i("wichtig", "received ack from $sendCommand")
                         answerMessage(sendCommand, messageArry)
 
                     }
@@ -215,7 +214,7 @@ class ControlActivity: AppCompatActivity(){
         }
     }
 
-    fun answerMessage(sendCommand: String, messageArray: Array<String>){
+    private fun answerMessage(sendCommand: String, messageArray: Array<String>){
         runOnUiThread {
             if (sendCommand == "getAutomaticMode") {
                 val automaticMode = findViewById<SwitchMaterial>(R.id.automaticModeSwitch)
@@ -261,12 +260,20 @@ class ControlActivity: AppCompatActivity(){
                 greenTimeDelay = messageArray[2]
             }
 
+            if (sendCommand == "version"){
+                versionControler = messageArray[2]
+            }
+            if (sendCommand == "protocolVersion"){
+                versionProtocol = messageArray[2]
+            }
+
+
         }
     }
 
 
 
-    fun messageEdit(input: Array<String>) {
+    private fun messageEdit(input: Array<String>) {
 
         runOnUiThread {
             val ampelPicture = findViewById<ImageView>(R.id.ampelPicture)
@@ -295,6 +302,7 @@ class ControlActivity: AppCompatActivity(){
         }
 
 
+        @Deprecated("Deprecated in Java")
         override fun onPreExecute() {
             super.onPreExecute()
             m_progress = ProgressDialog.show(context, "Connecting", "please wait")
@@ -303,6 +311,7 @@ class ControlActivity: AppCompatActivity(){
 
 
 
+        @Deprecated("Deprecated in Java")
         @SuppressLint("MissingPermission")
         override fun doInBackground(vararg p0: Void?): String? {
             try {
@@ -330,6 +339,7 @@ class ControlActivity: AppCompatActivity(){
         }
 
 
+        @Deprecated("Deprecated in Java")
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
             if (!connectSuccess){

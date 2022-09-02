@@ -2,13 +2,10 @@ package com.example.ampel
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.opengl.Visibility
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
@@ -23,8 +20,10 @@ class MainActivity : AppCompatActivity() {
 
 
     companion object{
-        val EXTRA_ADDRESS: String = "Device_address"
+        const val EXTRA_ADDRESS: String = "Device_address"
     }
+
+    private var bluetoothPermission: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,10 +56,12 @@ class MainActivity : AppCompatActivity() {
         val connect = findViewById<Button>(R.id.connect)
         val ampelStart = findViewById<ImageView>(R.id.ampelStart)
         val bluetoothOFF = findViewById<TextView>(R.id.bluetoothOFF)
-        if (m_bluetoothAdapter!!.isEnabled){
+        val refresh = findViewById<Button>(R.id.select_device_refresh)
+        if (m_bluetoothAdapter!!.isEnabled && bluetoothPermission){
             connect.visibility = View.VISIBLE
             bluetoothOFF.visibility = View.INVISIBLE
             ampelStart.setImageResource(R.drawable.ampelgreen)
+            refresh.visibility = View.INVISIBLE
         }
     }
 
@@ -70,13 +71,13 @@ class MainActivity : AppCompatActivity() {
         val connect = findViewById<Button>(R.id.connect)
         val ampelStart = findViewById<ImageView>(R.id.ampelStart)
         val bluetoothOFF = findViewById<TextView>(R.id.bluetoothOFF)
+        val refresh = findViewById<Button>(R.id.select_device_refresh)
         val requestPermissionLauncher =
             registerForActivityResult(
                 ActivityResultContracts.RequestMultiplePermissions()
             ) { permissions ->
                 var allowed = true;
                 permissions.entries.forEach {
-                    val permissionName = it.key
                     val isGranted = it.value
                     if (isGranted) {
                         // Permission is granted
@@ -94,6 +95,7 @@ class MainActivity : AppCompatActivity() {
                         val connectLost = findViewById<TextView>(R.id.connectLost)
                         connectLost.visibility = View.VISIBLE
                         connect.visibility = View.INVISIBLE
+                        //refresh.visibility = View.VISIBLE
 
                         Toast.makeText(this, "Ich brauche die Bluetooth erlaubnis, um auf die Ampel zuzugreifen", Toast.LENGTH_LONG).show()
                         allowed = false;
@@ -109,6 +111,8 @@ class MainActivity : AppCompatActivity() {
                         ampelStart.setImageResource(R.drawable.ampelred)
                         bluetoothOFF.visibility = View.VISIBLE
                         connect.visibility = View.INVISIBLE
+                        refresh.visibility = View.VISIBLE
+                        bluetoothPermission = true
                         val enableBluetoothIntent =
                             Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                         startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BLUETOOTH)
