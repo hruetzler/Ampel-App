@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -26,26 +27,82 @@ class SettingActivity: AppCompatActivity() {
         setContentView(R.layout.setting_layout)
         Log.i("wichtig", "jetzt wurde die ansicht geändert.")
 
-
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
 
         val greenTimeInputEditText = findViewById<TextInputEditText>(R.id.greenTimeEditText)
         val redTimeInputEditText = findViewById<TextInputEditText>(R.id.redTimeEditText)
         val greenTimeDelayEditText = findViewById<TextInputEditText>(R.id.greenTimeDelayEditText)
         val version = findViewById<TextView>(R.id.version)
 
-        version.text = "Controler: " + versionControler + " App: 1.0.0 Protocol: " + versionProtocol + "App Protocol: 1.0.0"
+        version.text = "Controler: " + versionControler + " App: 1.5.0 Protocol: " + versionProtocol + "App Protocol: 1.0.0"
 
-        greenTimeInputEditText.setOnKeyListener{ view, keyCode, _ ->
-            handleKeyEvent(view, keyCode)
+        val saveInputs = { view: View ->
+            if (greenTimeChange) {
+                greenTime()
+                greenTimeChange = false
+            }
+            if (redTimeChange) {
+                redTime()
+                redTimeChange = false
+            }
+            if (greenTimeDaleyChange) {
+                greenTimeDelay()
+                greenTimeDaleyChange = false
+            }
+            hideKeyboard(view)
         }
 
-        redTimeInputEditText.setOnKeyListener{ view, keyCode, _ ->
+        greenTimeInputEditText.setOnKeyListener { view, keyCode, _ ->
             handleKeyEvent(view, keyCode)
         }
-        greenTimeDelayEditText.setOnKeyListener{ view, keyCode, _ ->
-            handleKeyEvent(view, keyCode)
+        greenTimeInputEditText.setOnEditorActionListener { view, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
+                saveInputs(view)
+                true
+            } else {
+                false
+            }
+        }
+        greenTimeInputEditText.onFocusChangeListener = View.OnFocusChangeListener { view, hasFocus ->
+            if (!hasFocus) {
+                saveInputs(view)
+            }
         }
 
+        redTimeInputEditText.setOnKeyListener { view, keyCode, _ ->
+            handleKeyEvent(view, keyCode)
+        }
+        redTimeInputEditText.setOnEditorActionListener { view, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
+                saveInputs(view)
+                true
+            } else {
+                false
+            }
+        }
+        redTimeInputEditText.onFocusChangeListener = View.OnFocusChangeListener { view, hasFocus ->
+            if (!hasFocus) {
+                saveInputs(view)
+            }
+        }
+
+        greenTimeDelayEditText.setOnKeyListener { view, keyCode, _ ->
+            handleKeyEvent(view, keyCode)
+        }
+        greenTimeDelayEditText.setOnEditorActionListener { view, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT) {
+                saveInputs(view)
+                true
+            } else {
+                false
+            }
+        }
+        greenTimeDelayEditText.onFocusChangeListener = View.OnFocusChangeListener { view, hasFocus ->
+            if (!hasFocus) {
+                saveInputs(view)
+            }
+        }
 
         greenTimeInputEditText.setText(greenTime)
         redTimeInputEditText.setText(redTime)
@@ -54,6 +111,17 @@ class SettingActivity: AppCompatActivity() {
         greenTimeInputEditText.addTextChangedListener { greenTimeChange = true }
         redTimeInputEditText.addTextChangedListener { redTimeChange = true }
         greenTimeDelayEditText.addTextChangedListener { greenTimeDaleyChange = true }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        finish()
+        return true
+    }
+
+    private fun hideKeyboard(view: View) {
+        val inputMethodManager =
+            getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     private fun greenTime(){
@@ -88,10 +156,7 @@ class SettingActivity: AppCompatActivity() {
                 greenTimeDaleyChange = false
             }
 
-            // Hide the keyboard
-            val inputMethodManager =
-                getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+            hideKeyboard(view)
             return true
         }
         return false

@@ -1,16 +1,19 @@
 package com.example.ampel
 
 import android.Manifest
+import android.app.ProgressDialog
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
 import android.content.pm.PackageManager
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import kotlin.concurrent.thread
 
 
 class MainActivity : AppCompatActivity() {
@@ -47,10 +50,35 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun connection(){
+
         val address: String = getString(R.string.ampelAddress)
-        val intent = Intent(this, ControlActivity::class.java)
-        intent.putExtra(EXTRA_ADDRESS, address)
-        startActivity(intent)
+        val progressDialog = ProgressDialog.show(this, "Connecting", "please wait")
+
+        thread {
+            var connected = false
+            try {
+                connected = ControlActivity.connectToDevice(address)
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Initial Bluetooth connection failed", e)
+                connected = false
+            }
+
+            runOnUiThread {
+                try {
+                    progressDialog.dismiss()
+                } catch (_: Exception) {
+                }
+
+                if (!connected) {
+                    Toast.makeText(this, "Verbindung zur Ampel fehlgeschlagen. Bitte prüfe die Bluetooth-Verbindung und versuche es erneut.", Toast.LENGTH_LONG).show()
+                    return@runOnUiThread
+                }
+
+                val intent = Intent(this, ControlActivity::class.java)
+                intent.putExtra(EXTRA_ADDRESS, address)
+                startActivity(intent)
+            }
+        }
     }
     private fun refresh(){
         val connect = findViewById<Button>(R.id.connect)

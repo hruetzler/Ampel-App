@@ -39,6 +39,26 @@ class ControlActivity: AppCompatActivity(){
 
         lateinit var g_controlActivity: ControlActivity
         val msgIdMap: MutableMap<String, String> = mutableMapOf()
+
+        @SuppressLint("MissingPermission")
+        fun connectToDevice(address: String): Boolean {
+            return try {
+                if (m_bluetoothSocket == null || !m_isConnected) {
+                    m_bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+                    val device: BluetoothDevice = m_bluetoothAdapter.getRemoteDevice(address)
+                    m_bluetoothSocket = device.createInsecureRfcommSocketToServiceRecord(m_myUUID)
+                    m_bluetoothAdapter.cancelDiscovery()
+                    m_bluetoothSocket!!.connect()
+                    m_isConnected = true
+                }
+                true
+            } catch (e: IOException) {
+                Log.i("data", "Catch, couldn't connect")
+                m_isConnected = false
+                m_bluetoothSocket = null
+                false
+            }
+        }
     }
 
 
@@ -52,7 +72,11 @@ class ControlActivity: AppCompatActivity(){
 
 
 
-        ConnectToDevice(this).execute()
+        if (m_bluetoothSocket != null && m_isConnected) {
+            thread {
+                receive()
+            }
+        }
         val settingButton = findViewById<ImageButton>(R.id.floating_setting_button)
 
         val ampelSchalter = findViewById<Button>(R.id.schalter)
@@ -169,18 +193,44 @@ class ControlActivity: AppCompatActivity(){
         finish()
     }
 
+    private fun returnToStartScreen() {
+        if (isFinishing || isDestroyed) {
+            return
+        }
+
+        runOnUiThread {
+            if (isFinishing || isDestroyed) {
+                return@runOnUiThread
+            }
+            Toast.makeText(this, "Verbindung zur Ampel verloren. Zurück zur Startseite.", Toast.LENGTH_LONG).show()
+            val intent = Intent(this, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            startActivity(intent)
+            finish()
+        }
+    }
+
     private fun receive(){
+        if (m_bluetoothSocket == null) {
+            m_isConnected = false
+            returnToStartScreen()
+            return
+        }
+
         startAbfrage()
         val mmBuffer = ByteArray(1024) // mmBuffer store for the stream
         val mmInStream: InputStream = m_bluetoothSocket!!.inputStream
         var message: String
         var value : Int
         var bufferIndex  = 0
-        while (true){
+        while (m_bluetoothSocket != null && m_isConnected){
             value = try {
                 mmInStream.read()
             } catch (e: IOException) {
                 Log.d("wichtig", "Input stream was disconnected", e)
+                m_isConnected = false
+                m_bluetoothSocket = null
+                returnToStartScreen()
                 break
             }
             if ( value != 0x0a){
@@ -321,6 +371,7 @@ class ControlActivity: AppCompatActivity(){
                     m_bluetoothSocket = device.createInsecureRfcommSocketToServiceRecord(m_myUUID)
                     BluetoothAdapter.getDefaultAdapter().cancelDiscovery()
                     m_bluetoothSocket!!.connect()
+                    m_isConnected = true
 
                     thread {
                        (context as ControlActivity).receive()
@@ -331,6 +382,8 @@ class ControlActivity: AppCompatActivity(){
                 }
             } catch (e: IOException){
                 Log.i("data", "Catch, couldn't connect")
+                m_isConnected = false
+                m_bluetoothSocket = null
                 connectSuccess = false
 
                 e.printStackTrace()
@@ -342,12 +395,14 @@ class ControlActivity: AppCompatActivity(){
         @Deprecated("Deprecated in Java")
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
+            m_progress.dismiss()
             if (!connectSuccess){
                 Log.i("data", "couldn't connect")
-            } else {
-                connectSuccess = true
+                Toast.makeText(context, "Verbindung zur Ampel fehlgeschlagen. Bitte prüfe die Bluetooth-Verbindung und versuche es erneut.", Toast.LENGTH_LONG).show()
+                (context as? AppCompatActivity)?.finish()
+                return
             }
-            m_progress.dismiss()
+            connectSuccess = true
         }
 
     }
