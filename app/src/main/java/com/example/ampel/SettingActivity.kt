@@ -35,7 +35,7 @@ class SettingActivity: AppCompatActivity() {
         val greenTimeDelayEditText = findViewById<TextInputEditText>(R.id.greenTimeDelayEditText)
         val version = findViewById<TextView>(R.id.version)
 
-        version.text = "Controler: " + versionControler + " App: 1.5.0 Protocol: " + versionProtocol + "App Protocol: 1.0.0"
+        version.text = "Controler: " + versionControler + " App: 2.0.0 Protocol: " + versionProtocol + "App Protocol: 1.0.0"
 
         val saveInputs = { view: View ->
             if (greenTimeChange) {
